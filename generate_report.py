@@ -991,7 +991,7 @@ def build_report_data() -> dict:
         for g in grants_by_category["automation"]:
             if g.client in auto_merged:
                 existing = auto_merged[g.client]
-                existing.extra["subtype"] += ", " + g.extra.get("subtype", "?")
+                existing.extra["subtype"] = existing.extra.get("subtype", "?") + ", " + g.extra.get("subtype", "?")
             else:
                 auto_merged[g.client] = g
         grants_by_category["automation"] = list(auto_merged.values())
