@@ -13,7 +13,7 @@ macOS gates access to sensitive resources (camera, mic, files, screen recording,
 - **Critical permissions:** Full Disk Access, Accessibility, Screen Recording, Input Monitoring.
 - **High-risk permissions:** Camera, Microphone.
 - **Medium-risk permissions:** Personal Data (Contacts, Calendar, Reminders, Bluetooth), Automation (Apple Events).
-- **Ghost entries:** TCC rows whose `client` references an app that no longer exists on disk. These are the ones macOS forgets to clean up, and they're the most interesting to a privacy-minded reader because a future installer can claim the same bundle ID and inherit the grant.
+- **Ghost entries:** TCC rows whose `client` references an app that no longer exists on disk. These are the ones macOS forgets to clean up, and System Settings doesn't show them. TCC binds most grants to the app's code-signing requirement, so an unrelated app can't simply reuse the bundle ID and inherit them. Still, a reinstall from the same developer picks the grant back up without asking, and stale rows are worth reviewing and revoking.
 
 Each category in the report includes:
 
