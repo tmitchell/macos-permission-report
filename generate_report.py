@@ -1025,7 +1025,7 @@ def build_report_data() -> dict:
             "apps": [
                 {
                     "name": g.app_name,
-                    "bundle_id": g.client if g.client_type == 0 else g.client,
+                    "bundle_id": g.client,
                     "assessment": g.assessment,
                     "assessment_label": g.assessment_label,
                     "assessment_reason": g.assessment_reason,
@@ -1102,7 +1102,7 @@ def build_report_data() -> dict:
         if key not in ghost_merged:
             ghost_merged[key] = {
                 "name": g.app_name,
-                "bundle_id": g.client if g.client_type == 0 else g.client,
+                "bundle_id": g.client,
                 "permissions": [],
             }
         svc_name = SERVICE_NAME.get(g.service, g.service)
