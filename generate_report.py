@@ -638,8 +638,8 @@ def query_tcc_database(db_path: Path, source_label: str) -> list[dict]:
 
     try:
         # Open read-only via URI.  The system TCC database may be protected
-        # by SIP/TCC itself; this will raise OperationalError if access is
-        # denied.
+        # by SIP/TCC itself; access denial surfaces as OperationalError or,
+        # on older Python/SQLite builds, its parent DatabaseError.
         uri = f"file:{db_path}?mode=ro"
         conn = sqlite3.connect(uri, uri=True)
         conn.row_factory = sqlite3.Row
@@ -662,7 +662,7 @@ def query_tcc_database(db_path: Path, source_label: str) -> list[dict]:
         ]
         conn.close()
         return rows
-    except sqlite3.OperationalError as e:
+    except sqlite3.DatabaseError as e:
         print(f"  ⚠ Cannot read {db_path}: {e}")
         print(f"    (The process may need Full Disk Access to read the {source_label} TCC database.)")
         return []
