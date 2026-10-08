@@ -403,8 +403,9 @@
   <div class="sysdb-warn">
     <strong>&#9888; System TCC database was not readable.</strong>
     Critical categories (Full Disk Access, Accessibility, Screen Recording, Input Monitoring)
-    are missing from this report. Run from Terminal (which has Full Disk Access) or use
-    <code>sudo</code> to include them.
+    are missing from this report. Grant Full Disk Access to the terminal app you ran this from
+    (System Settings &rarr; Privacy &amp; Security &rarr; Full Disk Access) and re-run;
+    <code>sudo</code> won't help, because TCC applies to root too.
   </div>
   {% endif %}
 
