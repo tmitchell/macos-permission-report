@@ -292,11 +292,14 @@
   }
   .ghost-banner strong { color: #4c1d95; }
   .ghost-table .app-name { color: var(--ghost); }
-  .reset-cmd { display: inline-block; margin-top: 4px; word-break: break-all; user-select: all; }
-  .reset-note { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
-  .reset-all { margin: 0.75rem 1.25rem 1rem; }
-  .reset-all-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; }
-  .reset-all pre {
+  .ghost-id { display: inline-block; margin-top: 4px; word-break: break-all; user-select: all; }
+  .reset-help { margin: 0.75rem 1.25rem 1rem; font-size: 0.85rem; }
+  .reset-help h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.4rem; }
+  .reset-help p, .reset-help ul { margin-bottom: 0.6rem; }
+  .reset-help ul { padding-left: 1.25rem; }
+  .reset-help li { margin-bottom: 0.3rem; }
+  .reset-help-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; }
+  .reset-help pre {
     font-family: 'SF Mono', 'Fira Code', Menlo, monospace; font-size: 0.75rem;
     background: #f1f5f9; padding: 0.75rem 1rem; border-radius: 6px;
     overflow-x: auto; margin: 0; user-select: all;
@@ -506,9 +509,7 @@
         <strong>These apps are no longer installed</strong> but still have <em>allowed</em>
         permissions in your TCC database. System Settings usually doesn't list them, and
         reinstalling the app (or another build from the same developer) regains them
-        without a prompt. Revoke each one with the <code>tccutil</code> command shown;
-        grants from the system database (Full Disk Access, Accessibility, Screen Recording,
-        Input Monitoring) may need <code>sudo</code>.
+        without a prompt. See <em>How to revoke</em> below the table.
       </div>
       <table class="ghost-table">
         <thead><tr><th>App</th><th>Residual Permissions</th><th>Risk</th></tr></thead>
@@ -517,12 +518,7 @@
           <tr>
             <td>
               <div class="app-name">{{ ghost.name }}</div>
-              {% if ghost.reset_command %}
-              <code class="reset-cmd">{{ ghost.reset_command }}</code>
-              {% else %}
-              <div class="bundle-id">{{ ghost.bundle_id }}</div>
-              <div class="reset-note">Path-based entry; <code>tccutil</code> can't target paths.</div>
-              {% endif %}
+              <code class="ghost-id">{{ ghost.bundle_id }}</code>
             </td>
             <td>
               {% for perm in ghost.permissions %}
@@ -534,13 +530,26 @@
           {% endfor %}
         </tbody>
       </table>
-      {% set reset_commands = ghosts | map(attribute='reset_command') | select | list %}
-      {% if reset_commands %}
-      <div class="reset-all">
-        <div class="reset-all-label">All revoke commands, ready to paste into Terminal:</div>
-        <pre>{{ reset_commands | join('\n') }}</pre>
+      <div class="reset-help">
+        <h3>How to revoke</h3>
+        <p><code>tccutil reset All &lt;bundle-id&gt;</code> only works while the app is
+          installed: <code>tccutil</code> looks the bundle ID up in LaunchServices and fails
+          with <em>No such bundle identifier</em> (OSStatus -10814) for uninstalled apps.
+          That leaves two options:</p>
+        <ul>
+          <li><strong>Targeted:</strong> reinstall the app, run
+            <code>tccutil reset All &lt;bundle-id&gt;</code> with the ID shown above, then
+            uninstall it again.</li>
+          <li><strong>Per service:</strong> reset each affected permission for
+            <em>every</em> app. Apps you still use will ask again the next time they need
+            access, so you re-grant the ones you want. This also clears path-based entries.
+            Resetting system-level permissions (Full Disk Access, Accessibility, Screen
+            Recording, Input Monitoring) may require <code>sudo</code>.</li>
+        </ul>
+        <div class="reset-help-label">Per-service resets for the permissions listed above:</div>
+        <pre>{% for svc in ghost_reset_services %}tccutil reset {{ svc }}
+{% endfor %}</pre>
       </div>
-      {% endif %}
     </div>
   </details>
   {% endif %}
@@ -560,8 +569,8 @@
           <div><strong>Purge ghost permissions.</strong>
             {{ ghosts | length }} uninstalled app{{ 's' if ghosts | length != 1 else '' }}
             retain{{ '' if ghosts | length != 1 else 's' }} allowed permissions.
-            Run the <code>tccutil reset All</code> commands listed in the Ghost Permissions
-            section above.</div>
+            Follow <em>How to revoke</em> in the Ghost Permissions section above:
+            <code>tccutil</code> can't target an uninstalled app by bundle ID.</div>
         </div>
         {% endif %}
 

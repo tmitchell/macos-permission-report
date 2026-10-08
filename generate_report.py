@@ -42,7 +42,6 @@ import argparse
 import os
 import platform
 import plistlib
-import shlex
 import sqlite3
 import subprocess
 from dataclasses import dataclass, field
@@ -1104,8 +1103,6 @@ def build_report_data() -> dict:
             ghost_merged[key] = {
                 "name": g.app_name,
                 "bundle_id": g.client,
-                # tccutil only accepts bundle IDs, so path clients get no command
-                "reset_command": f"tccutil reset All {shlex.quote(g.client)}" if g.client_type == 0 else "",
                 "permissions": [],
             }
         svc_name = SERVICE_NAME.get(g.service, g.service)
@@ -1115,6 +1112,12 @@ def build_report_data() -> dict:
             entry["permissions"].append({"name": svc_name, "risk": risk})
 
     ghost_list = sorted(ghost_merged.values(), key=lambda g: -len(g["permissions"]))
+
+    # tccutil resolves bundle IDs through LaunchServices, so
+    # `tccutil reset All <bundle-id>` fails (OSStatus -10814) for apps that
+    # are no longer installed. The fallback is a per-service reset, which
+    # clears that service for every app; list only the services ghosts hold.
+    ghost_reset_services = sorted({g.service.removeprefix("kTCCService") for g in ghosts})
     for g in ghost_list:
         has_critical = any(p["risk"] == "critical" for p in g["permissions"])
         g["risk_label"] = "Critical" if has_critical else "High"
@@ -1176,6 +1179,7 @@ def build_report_data() -> dict:
         "concentration": concentration,
         "categories": categories_data,
         "ghosts": ghost_list,
+        "ghost_reset_services": ghost_reset_services,
         "system_db_readable": len(system_rows) > 0,
     }
 
