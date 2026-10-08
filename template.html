@@ -291,6 +291,15 @@
   }
   .ghost-banner strong { color: #4c1d95; }
   .ghost-table .app-name { color: var(--ghost); }
+  .reset-cmd { display: inline-block; margin-top: 4px; word-break: break-all; user-select: all; }
+  .reset-note { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .reset-all { margin: 0.75rem 1.25rem 1rem; }
+  .reset-all-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; }
+  .reset-all pre {
+    font-family: 'SF Mono', 'Fira Code', Menlo, monospace; font-size: 0.75rem;
+    background: #f1f5f9; padding: 0.75rem 1rem; border-radius: 6px;
+    overflow-x: auto; margin: 0; user-select: all;
+  }
 
   /* ── Recommendations ── */
   .rec-list { padding: 1.25rem 1.5rem; }
@@ -493,10 +502,11 @@
     <div class="section-body">
       <div class="ghost-banner">
         <strong>These apps are no longer installed</strong> but still have <em>allowed</em>
-        permissions in your TCC database. If any of these bundle IDs were reused by
-        malware, it would inherit these permissions silently. They should be revoked via
-        <strong>System Settings &rarr; Privacy &amp; Security</strong> or
-        <code>tccutil reset All &lt;bundle-id&gt;</code>.
+        permissions in your TCC database. System Settings usually doesn't list them, and
+        reinstalling the app (or another build from the same developer) regains them
+        without a prompt. Revoke each one with the <code>tccutil</code> command shown;
+        grants from the system database (Full Disk Access, Accessibility, Screen Recording,
+        Input Monitoring) may need <code>sudo</code>.
       </div>
       <table class="ghost-table">
         <thead><tr><th>App</th><th>Residual Permissions</th><th>Risk</th></tr></thead>
@@ -505,7 +515,12 @@
           <tr>
             <td>
               <div class="app-name">{{ ghost.name }}</div>
+              {% if ghost.reset_command %}
+              <code class="reset-cmd">{{ ghost.reset_command }}</code>
+              {% else %}
               <div class="bundle-id">{{ ghost.bundle_id }}</div>
+              <div class="reset-note">Path-based entry; <code>tccutil</code> can't target paths.</div>
+              {% endif %}
             </td>
             <td>
               {% for perm in ghost.permissions %}
@@ -517,6 +532,13 @@
           {% endfor %}
         </tbody>
       </table>
+      {% set reset_commands = ghosts | map(attribute='reset_command') | select | list %}
+      {% if reset_commands %}
+      <div class="reset-all">
+        <div class="reset-all-label">All revoke commands, ready to paste into Terminal:</div>
+        <pre>{{ reset_commands | join('\n') }}</pre>
+      </div>
+      {% endif %}
     </div>
   </div>
   {% endif %}
@@ -535,9 +557,9 @@
           <div class="rec-num">1</div>
           <div><strong>Purge ghost permissions.</strong>
             {{ ghosts | length }} uninstalled app{{ 's' if ghosts | length != 1 else '' }}
-            retain{{ '' if ghosts | length != 1 else 's' }} allowed access to critical categories.
-            Open <strong>System Settings &rarr; Privacy &amp; Security</strong> and remove each
-            ghost entry, or run <code>tccutil reset All &lt;bundle-id&gt;</code> for each.</div>
+            retain{{ '' if ghosts | length != 1 else 's' }} allowed permissions.
+            Run the <code>tccutil reset All</code> commands listed in the Ghost Permissions
+            section above.</div>
         </div>
         {% endif %}
 

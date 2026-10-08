@@ -40,8 +40,9 @@ from __future__ import annotations
 
 import argparse
 import os
-import plistlib
 import platform
+import plistlib
+import shlex
 import sqlite3
 import subprocess
 from dataclasses import dataclass, field
@@ -1103,6 +1104,8 @@ def build_report_data() -> dict:
             ghost_merged[key] = {
                 "name": g.app_name,
                 "bundle_id": g.client,
+                # tccutil only accepts bundle IDs, so path clients get no command
+                "reset_command": f"tccutil reset All {shlex.quote(g.client)}" if g.client_type == 0 else "",
                 "permissions": [],
             }
         svc_name = SERVICE_NAME.get(g.service, g.service)
