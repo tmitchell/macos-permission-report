@@ -23,26 +23,21 @@ Each category in the report includes:
 
 ## Install and run
 
+Requires [uv](https://docs.astral.sh/uv/), which installs Python and the Jinja2 dependency on first run.
+
 ```bash
 # Clone
 git clone https://github.com/LunaParker/macos-permission-report.git
 cd macos-permission-report
 
-# Set up a virtual environment (recommended)
-python3 -m venv venv
-source venv/bin/activate
-
-# Install the one dependency
-pip install -r requirements.txt
-
 # Run
-python generate_report.py
+uv run generate_report.py
 ```
 
 By default the report is written to `~/Downloads/privacy_audit.html`. Override with `--output`:
 
 ```bash
-python generate_report.py --output ./report.html
+uv run generate_report.py --output ./report.html
 ```
 
 Then open the file in your browser:

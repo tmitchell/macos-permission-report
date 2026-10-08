@@ -1,0 +1,10 @@
+[project]
+name = "macos-permission-report"
+version = "0.1.0"
+description = "Audit macOS TCC privacy permissions and render a self-contained HTML report."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+dependencies = [
+    "jinja2>=3.1",
+]

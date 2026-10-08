@@ -7,7 +7,7 @@ which applications hold dangerous privacy permissions, flags ghost entries for
 uninstalled apps, and generates a detailed HTML report.
 
 Usage:
-    python generate_report.py [--output PATH]
+    uv run generate_report.py [--output PATH]
 
 TCC Background
 --------------
