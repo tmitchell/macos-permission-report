@@ -155,8 +155,10 @@
     user-select: none;
     border-bottom: 1px solid transparent;
     transition: border-color 0.15s;
+    list-style: none;
   }
-  .section.open .section-header { border-bottom-color: var(--border); }
+  .section-header::-webkit-details-marker { display: none; }
+  .section[open] .section-header { border-bottom-color: var(--border); }
   .section-header .icon {
     width: 32px; height: 32px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
@@ -165,9 +167,8 @@
   .section-header h2 { font-size: 1rem; font-weight: 600; flex: 1; }
   .section-header .count { font-size: 0.8rem; color: var(--muted); font-weight: 500; }
   .section-header .chevron { color: var(--muted); transition: transform 0.2s; font-size: 0.8rem; }
-  .section.open .section-header .chevron { transform: rotate(90deg); }
-  .section-body { display: none; padding: 0; }
-  .section.open .section-body { display: block; }
+  .section[open] .section-header .chevron { transform: rotate(90deg); }
+  .section-body { padding: 0; }
 
   /* ── Threat descriptions ── */
   .threat-info {
@@ -411,13 +412,13 @@
 
   {# ── Privilege Concentration ────────────────────────────────────── #}
   {% if concentration %}
-  <div class="section open">
-    <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+  <details class="section" open>
+    <summary class="section-header">
       <div class="icon icon-critical">!!</div>
       <h2>Highest Privilege Concentration</h2>
       <span class="count">Apps holding 3+ dangerous permissions</span>
       <span class="chevron">&#9654;</span>
-    </div>
+    </summary>
     <div class="section-body">
       <div class="conc-grid">
         {% for app in concentration %}
@@ -435,19 +436,19 @@
         {% endfor %}
       </div>
     </div>
-  </div>
+  </details>
   {% endif %}
 
   {# ── Permission Category Sections ──────────────────────────────── #}
   {% for cat in categories %}
   {% if cat.apps | length > 0 %}
-  <div class="section{% if cat.risk_level == 'critical' and loop.first %} open{% endif %}">
-    <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+  <details class="section"{% if cat.risk_level == 'critical' and loop.first %} open{% endif %}>
+    <summary class="section-header">
       <div class="icon icon-{{ cat.risk_level }}">{{ cat.icon | safe }}</div>
       <h2>{{ cat.name }}</h2>
       <span class="count">{{ cat.count }} app{{ 's' if cat.count != 1 else '' }}{% if cat.subtitle %} &middot; {{ cat.subtitle }}{% endif %}</span>
       <span class="chevron">&#9654;</span>
-    </div>
+    </summary>
     <div class="section-body">
       {# Threat description #}
       <div class="threat-info">
@@ -487,19 +488,19 @@
         </tbody>
       </table>
     </div>
-  </div>
+  </details>
   {% endif %}
   {% endfor %}
 
   {# ── Ghost Permissions ──────────────────────────────────────────── #}
   {% if ghosts %}
-  <div class="section open">
-    <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+  <details class="section" open>
+    <summary class="section-header">
       <div class="icon icon-ghost">&#128123;</div>
       <h2>Ghost Permissions</h2>
       <span class="count">{{ ghosts | length }} uninstalled app{{ 's' if ghosts | length != 1 else '' }} still holding allowed permissions</span>
       <span class="chevron">&#9654;</span>
-    </div>
+    </summary>
     <div class="section-body">
       <div class="ghost-banner">
         <strong>These apps are no longer installed</strong> but still have <em>allowed</em>
@@ -541,16 +542,16 @@
       </div>
       {% endif %}
     </div>
-  </div>
+  </details>
   {% endif %}
 
   {# ── Recommendations ────────────────────────────────────────────── #}
-  <div class="section open">
-    <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+  <details class="section" open>
+    <summary class="section-header">
       <div class="icon icon-rec">&#10003;</div>
       <h2>Recommendations</h2>
       <span class="chevron">&#9654;</span>
-    </div>
+    </summary>
     <div class="section-body">
       <div class="rec-list">
         {% if ghosts %}
@@ -591,7 +592,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </details>
 
 </div>
 
