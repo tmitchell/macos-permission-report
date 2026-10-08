@@ -12,7 +12,7 @@ macOS gates access to sensitive resources (camera, mic, files, screen recording,
 
 - **Critical permissions:** Full Disk Access, Accessibility, Screen Recording, Input Monitoring.
 - **High-risk permissions:** Camera, Microphone.
-- **Medium-risk permissions:** Personal Data (Contacts, Calendar, Reminders, Bluetooth, Photos, folder access), Automation (Apple Events).
+- **Medium-risk permissions:** Personal Data (Contacts, Calendar, Reminders, Bluetooth), Automation (Apple Events).
 - **Ghost entries:** TCC rows whose `client` references an app that no longer exists on disk. These are the ones macOS forgets to clean up, and they're the most interesting to a privacy-minded reader because a future installer can claim the same bundle ID and inherit the grant.
 
 Each category in the report includes:
@@ -77,7 +77,7 @@ The key table in each database is `access`. The columns this tool reads are:
 ## How it works
 
 1. **Open both TCC databases** read-only via SQLite. Skip the system DB gracefully if FDA isn't available; the user DB still produces a useful (partial) report.
-2. **Walk `/Applications` and `~/Applications`** to build a `bundle_id → InstalledApp` map by reading each `.app/Contents/Info.plist`. This is what later lets the report show *Brave Browser* instead of `com.brave.Browser`.
+2. **Find installed apps** with Spotlight (`mdfind`) across `/Applications`, `~/Applications`, and `/System/Applications`, falling back to a plain directory scan if Spotlight fails, and build a `bundle_id → InstalledApp` map by reading each `.app/Contents/Info.plist`. This is what later lets the report show *Brave Browser* instead of `com.brave.Browser`.
 3. **For each grant**, classify by service into one of the eight categories, look up the friendly name (or fall back to the raw bundle ID / path), and assign a risk level.
 4. **Detect ghost entries** by checking each grant's `client` against the installed-apps map. If no match: the grant is for an app that's no longer present.
 5. **Render the HTML report** using Jinja2 against `template.html`. The output is fully self-contained — inline CSS, no JavaScript, no external assets — so it can be opened in any browser, emailed to yourself, or saved as a PDF.
@@ -91,7 +91,7 @@ The key table in each database is `access`. The columns this tool reads are:
 
 ## What's not (yet) covered
 
-- Network connection grants (`kTCCServiceListenEvent`, `kTCCServicePostEvent`) are decoded as Automation indirectly but not surfaced as a top-level Network section.
+- Several user-database services aren't surfaced yet: Photos, Media Library, folder access (Desktop, Documents, Downloads), and iCloud Drive.
 - Sandbox container access patterns (App Sandbox / Group Containers).
 - TCC reset history (`tccutil reset` events) — TCC doesn't keep an audit log of revocations, so neither does this tool.
 
